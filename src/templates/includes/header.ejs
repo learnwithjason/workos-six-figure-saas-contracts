@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="./styles.css" />
+		<title>SaaS Co.</title>
+	</head>
+	<body>
+		<header>
+			<a href="/" rel="home">SaaS Co.</a>
+
+			<nav>
+				<% if (user) { %>
+				<a href="/dashboard">Dashboard</a>
+				<span
+					>Logged in as <%= user.first_name %>
+					<a href="/auth/logout">log out</a></span
+				>
+				<% } else { %>
+				<a href="/auth/sso">Log In</a>
+				<% } %>
+			</nav>
+		</header>
+
+		<main>

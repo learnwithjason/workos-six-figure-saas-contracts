@@ -1,0 +1,41 @@
+<%- include('includes/header', { user }); %>
+
+<h1>Welcome, <%= user.first_name %>!</h1>
+
+<p>
+	This is your app dashboard. Things happen here that your company is willing to
+	pay six figures a month for.
+</p>
+
+<div class="app-actions">
+	<div class="card">
+		<h3>To the Edge!</h3>
+		<p>
+			When companies talk about the edge, just like Justin Beiber’s 2015 single
+			we ask, “What do you mean?” We’re not sure what the edge is, but we know
+			you need it!
+		</p>
+		<button>Activate the Edge!</button>
+	</div>
+
+	<div class="card">
+		<h3>Make It Blazinger!</h3>
+		<p>
+			Fast is no longer fast enough; the only acceptable kind of fast is BLAZING
+			FAST. Enable this service to make your app blazing fast.
+		</p>
+		<button>Make It Blazing!</button>
+	</div>
+
+	<div class="card">
+		<h3>Make It Convertier!</h3>
+		<p>
+			If coffee is for closers, most products are having caffeine withdrawals.
+			Activate Jerry Maguire mode in your app and your customers will SHOW YOU
+			THE MONEY!
+		</p>
+		<button>Convert! Convert!</button>
+	</div>
+</div>
+
+<%- include('includes/footer'); %>
