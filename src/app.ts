@@ -38,7 +38,7 @@ const __dirname = path.dirname(__filename);
 
 const workos = new WorkOS(process.env.WORKOS_API_KEY);
 const clientID = process.env.WORKOS_CLIENT_ID!;
-const connection = process.env.WORKOS_CONNECTION_ID!;
+const organization = process.env.WORKOS_ORG_ID;
 
 const app: FastifyPluginAsync = async (fastify, _opts) => {
 	// Fastify plugins and config
@@ -66,7 +66,7 @@ const app: FastifyPluginAsync = async (fastify, _opts) => {
 	// WorkOS SSO flow
 	fastify.get("/auth/sso", async (_req, res) => {
 		const authorizationUrl = workos.sso.getAuthorizationURL({
-			connection,
+			organization,
 			clientID,
 			redirectURI: "http://localhost:3000/auth/sso/redirect",
 		});
