@@ -13,15 +13,13 @@ import { WorkOS } from "@workos-inc/node";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const publicDirRoot = path.join(__dirname, "..", "public");
 
 const workos = new WorkOS(process.env.WORKOS_API_KEY);
 
 const app: FastifyPluginAsync = async (fastify, _opts) => {
-	const publicDirRoot = path.join(__dirname, "..", "public");
 	fastify.register(fastifyStatic, { root: publicDirRoot });
 	fastify.register(fastifyView, { engine: { ejs } });
-
-	// Fastify plugins and config
 	fastify.register(fastifyCookie);
 	fastify.register(fastifySession, {
 		secret: process.env.SESSION_SECRET!,
@@ -72,10 +70,8 @@ const app: FastifyPluginAsync = async (fastify, _opts) => {
 
 	// App views
 	fastify.get("/", async (req, reply) => {
-		const user = req.session.user;
-
 		return reply.view("src/templates/index.ejs", {
-			user,
+			user: req.session.user,
 		});
 	});
 
@@ -90,8 +86,8 @@ const app: FastifyPluginAsync = async (fastify, _opts) => {
 	});
 
 	// all other requests fall through to static files
-	fastify.get<StaticRequest>("/:filename", async function (request, reply) {
-		const { filename } = request.params;
+	fastify.get<StaticRequest>("/:filename", async function (req, reply) {
+		const { filename } = req.params;
 
 		return reply.sendFile(filename);
 	});
