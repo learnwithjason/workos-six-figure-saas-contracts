@@ -3,7 +3,8 @@
 	"name": "workos-six-figure-saas-contracts",
 	"description": "This project was bootstrapped with Fastify-CLI.",
 	"version": "1.0.0",
-	"main": "app.ts",
+	"main": "src/app.ts",
+	"types": "src/types.d.ts",
 	"directories": {
 		"test": "test"
 	},

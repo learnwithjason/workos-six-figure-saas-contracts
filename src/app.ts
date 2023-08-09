@@ -1,46 +1,26 @@
 import "dotenv/config";
 
-import type { FastifyPluginAsync, RequestGenericInterface } from "fastify";
-import fastifyCookie from "@fastify/cookie";
-import fastifySession from "@fastify/session";
-import fastifyView from "@fastify/view";
-import fastifyStatic from "@fastify/static";
-import ejs from "ejs";
-import { WorkOS } from "@workos-inc/node";
+import type { FastifyPluginAsync } from "fastify";
+import type { StaticRequest, RedirectRequest } from "./types.js";
 import * as path from "path";
 import { fileURLToPath } from "url";
-
-declare module "fastify" {
-	interface Session {
-		user: {
-			id: string;
-			first_name?: string;
-			last_name?: string;
-			email: string;
-		};
-	}
-}
-
-interface StaticRequest extends RequestGenericInterface {
-	Params: {
-		filename: string;
-	};
-}
-
-interface RedirectRequest extends RequestGenericInterface {
-	Querystring: {
-		code: string;
-	};
-}
+import ejs from "ejs";
+import fastifyView from "@fastify/view";
+import fastifyStatic from "@fastify/static";
+import fastifyCookie from "@fastify/cookie";
+import fastifySession from "@fastify/session";
+import { WorkOS } from "@workos-inc/node";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const workos = new WorkOS(process.env.WORKOS_API_KEY);
-const clientID = process.env.WORKOS_CLIENT_ID!;
-const organization = process.env.WORKOS_ORG_ID;
 
 const app: FastifyPluginAsync = async (fastify, _opts) => {
+	const publicDirRoot = path.join(__dirname, "..", "public");
+	fastify.register(fastifyStatic, { root: publicDirRoot });
+	fastify.register(fastifyView, { engine: { ejs } });
+
 	// Fastify plugins and config
 	fastify.register(fastifyCookie);
 	fastify.register(fastifySession, {
@@ -57,18 +37,12 @@ const app: FastifyPluginAsync = async (fastify, _opts) => {
 				: { secure: false },
 	});
 
-	fastify.register(fastifyView, { engine: { ejs } });
-
-	fastify.register(fastifyStatic, {
-		root: path.join(__dirname, "..", "public"),
-	});
-
 	// WorkOS SSO flow
 	fastify.get("/auth/sso", async (_req, res) => {
 		const authorizationUrl = workos.sso.getAuthorizationURL({
-			organization,
-			clientID,
-			redirectURI: "http://localhost:3000/auth/sso/redirect",
+			clientID: process.env.WORKOS_CLIENT_ID!,
+			organization: process.env.WORKOS_ORG_ID,
+			redirectURI: process.env.REDIRECT_URI!,
 		});
 
 		res.redirect(authorizationUrl);
@@ -76,10 +50,9 @@ const app: FastifyPluginAsync = async (fastify, _opts) => {
 
 	fastify.get<RedirectRequest>("/auth/sso/redirect", async (req, res) => {
 		const { code } = req.query;
-
 		const { profile } = await workos.sso.getProfileAndToken({
 			code,
-			clientID,
+			clientID: process.env.WORKOS_CLIENT_ID!,
 		});
 
 		req.session.user = {
@@ -111,10 +84,8 @@ const app: FastifyPluginAsync = async (fastify, _opts) => {
 			return reply.redirect("/auth/sso");
 		}
 
-		const user = req.session.user;
-
 		return reply.view("src/templates/dashboard.ejs", {
-			user,
+			user: req.session.user,
 		});
 	});
 
@@ -127,4 +98,3 @@ const app: FastifyPluginAsync = async (fastify, _opts) => {
 };
 
 export default app;
-export { app };
